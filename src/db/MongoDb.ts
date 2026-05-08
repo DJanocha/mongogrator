@@ -1,12 +1,12 @@
 import { type Collection, type Db, MongoClient } from 'mongodb'
-import type { TMongogratorConfig } from '../config/config.js'
+import type { MongogratorConfig } from '../config/config.js'
 import type { TMigration } from './MigrationsService.js'
 
 export class Client {
 	client: MongoClient
 	db: Db
 	collection: Collection<TMigration>
-	constructor(config: TMongogratorConfig) {
+	constructor(config: MongogratorConfig) {
 		this.client = new MongoClient(config.url)
 		this.db = this.client.db(config.database)
 		this.collection = this.db.collection(config.logsCollectionName)

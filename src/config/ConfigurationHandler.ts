@@ -3,11 +3,12 @@ import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { MongogratorError } from '../errors/MongogratorError.js'
 import { MongogratorLogger } from '../loggers/MongogratorLogger.js'
+import type z from 'zod'
 import {
 	CONFIG_FILE_NAME,
 	CONFIG_JS_FILE_NAME,
 	CONFIG_TS_FILE_NAME,
-	type TMongogratorConfig,
+	ConfigFormatSchema,
 	mongogratorConfigSchema,
 } from './config.js'
 import { configTemplates } from './templates.js'
@@ -17,7 +18,7 @@ export type ReadConfigOptions = {
 }
 
 export type LoadedConfig = {
-	config: TMongogratorConfig
+	config: z.output<typeof mongogratorConfigSchema>
 	configFilePath: string
 }
 
@@ -55,7 +56,7 @@ export namespace ConfigurationHandler {
 
 	export async function initConfig(useJs: boolean) {
 		const fileName = useJs ? CONFIG_JS_FILE_NAME : CONFIG_TS_FILE_NAME
-		const extension = useJs ? 'js' : 'ts'
+		const extension : z.infer<typeof ConfigFormatSchema> = useJs ? 'js' : 'ts'
 		const configFilePath = path.join(process.cwd(), fileName)
 		if (fs.existsSync(configFilePath)) {
 			throw new MongogratorError(`${fileName} already initialized`)

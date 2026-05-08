@@ -69,32 +69,27 @@ This will create the migration file under the directory key assigned in the conf
 The following is an example of a newly created ts migration file
 
 ```ts
-import type { Db } from 'mongodb'
+import { buildMigration } from '@danieljanocha/mongogrator'
 
-/**
- * This function is called when the migration is run.
- * @param _db The mongodb database object that's passed to the migration
- */
-export const migrate = async (_db: Db): Promise<void> => {
-  // Migration code here
-}
+export default buildMigration({
+  migrate: async (_db) => {
+    // Migration code here
+  },
+})
 ```
 
-The migrations are executed through the native MongoDB Node.js driver
+The migrations are executed through the native MongoDB Node.js driver.
 
 ### Migration query example
 
 ```ts
-import type { Db } from 'mongodb'
+import { buildMigration } from '@danieljanocha/mongogrator'
 
-/**
- * This function is called when the migration is run.
- * @param _db The mongodb database object that's passed to the migration
- */
-export const migrate = async (_db: Db): Promise<void> => {
-  // Migration code here
-  _db.collection('users').insertOne({ name: 'Alex' })
-}
+export default buildMigration({
+  migrate: async (db) => {
+    await db.collection('users').insertOne({ name: 'Alex' })
+  },
+})
 ```
 
 ### Migrations list
@@ -169,16 +164,32 @@ Now if you run the `list` command again, it will reveal that the migration file 
 }
 ```
 
-For a type-safe config, parse against the exported schema:
+For a type-safe config, use the `buildMongogratorConfig` builder. It validates the shape at load time and gives you autocomplete on the input:
 
 ```ts
-import { mongogratorConfigSchema, type TMongogratorConfig } from '@danieljanocha/mongogrator'
+// mongogrator.config.ts
+import { buildMongogratorConfig } from '@danieljanocha/mongogrator'
 
-const config: TMongogratorConfig = mongogratorConfigSchema.parse({
-  // ...
+export default buildMongogratorConfig({
+  url: 'mongodb://localhost:27017',
+  database: 'test',
+  migrationsPath: './migrations',
+  logsCollectionName: 'migrations',
+  format: 'ts',
 })
+```
 
-export default config
+Migration files use the same builder pattern with a forced `default` export — this prevents typos like accidentally exporting `migratee` instead of `migrate`:
+
+```ts
+// migrations/20240923150201806_insert_user.ts
+import { buildMigration } from '@danieljanocha/mongogrator'
+
+export default buildMigration({
+  migrate: async (db) => {
+    await db.collection('users').insertOne({ name: 'Alex' })
+  },
+})
 ```
 
 > [!IMPORTANT]

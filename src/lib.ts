@@ -1,5 +1,8 @@
 export {
+	buildMigration,
+	buildMongogratorConfig,
 	mongogratorConfigSchema,
+	type MongogratorMigration,
 	type MongogratorMigrationCallback,
-	type TMongogratorConfig,
+	type MongogratorConfig,
 } from './config/config.js'

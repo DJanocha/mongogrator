@@ -1,8 +1,10 @@
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { ConfigurationHandler } from '../config/ConfigurationHandler.js'
+import type { MongogratorMigration } from '../config/config.js'
 import { MigrationsService } from '../db/MigrationsService.js'
 import { Client } from '../db/MongoDb.js'
+import { MongogratorError } from '../errors/MongogratorError.js'
 import { MongogratorLogger } from '../loggers/MongogratorLogger.js'
 import { BaseCommandStrategy } from './BaseCommandStrategy.js'
 
@@ -16,6 +18,7 @@ export class MigrateCommand extends BaseCommandStrategy {
 		By default the config file is loaded from the current working directory; pass
 		--config <path> to point at a specific mongogrator.config.{ts,js} file.
 		The config file determines the location of the migrations folder.
+		Each migration file must default-export a value created with buildMigration({ migrate }).
 	`
 
 	async execute() {
@@ -42,10 +45,11 @@ export class MigrateCommand extends BaseCommandStrategy {
 			const appliedMigrationsSet = await migrationsService.getAppliedSet()
 			for (const file of migrationFiles) {
 				if (!appliedMigrationsSet.has(path.parse(file).name)) {
-					const { migrate } = await import(
-						pathToFileURL(path.join(migrationsDir, file)).href
+					const migration = await loadMigration(
+						path.join(migrationsDir, file),
+						file,
 					)
-					await migrate(db)
+					await migration.migrate(db)
 					await migrationsService.insertApplied(path.parse(file).name)
 					MongogratorLogger.logInfo(`Migration ${file} applied`)
 				}
@@ -56,4 +60,18 @@ export class MigrateCommand extends BaseCommandStrategy {
 			}
 		})
 	}
+}
+
+async function loadMigration(
+	absPath: string,
+	displayName: string,
+): Promise<MongogratorMigration> {
+	const mod = await import(pathToFileURL(absPath).href)
+	const migration = mod.default as MongogratorMigration | undefined
+	if (!migration || typeof migration.migrate !== 'function') {
+		throw new MongogratorError(
+			`Migration "${displayName}" must default-export a value created with buildMigration({ migrate })`,
+		)
+	}
+	return migration
 }

@@ -1,7 +1,7 @@
 export const configTemplates = {
-	ts: `import { mongogratorConfigSchema, type TMongogratorConfig } from 'mongogrator'
+	ts: `import { buildMongogratorConfig } from '@danieljanocha/mongogrator'
 
-const mongogratorConfig: TMongogratorConfig = mongogratorConfigSchema.parse({
+export default buildMongogratorConfig({
 	url: 'mongodb://localhost:27017', // Cluster url
 	database: 'test', // Database name for which the migrations will be executed
 	migrationsPath: './migrations', // Migrations directory relative to the location of the config file
@@ -10,11 +10,10 @@ const mongogratorConfig: TMongogratorConfig = mongogratorConfigSchema.parse({
 	callbacksBeforeMigrations: [], // Async hooks (args: { db }) => Promise<void>, run once before the batch
 	callbacksAfterMigrations: [], // Async hooks (args: { db }) => Promise<void>, run once after the batch
 })
-
-export default mongogratorConfig
 `,
-	js: `/** @type {import('mongogrator').TMongogratorConfig} */
-const mongogratorConfig = {
+	js: `import { buildMongogratorConfig } from '@danieljanocha/mongogrator'
+
+export default buildMongogratorConfig({
 	url: 'mongodb://localhost:27017', // Cluster url
 	database: 'test', // Database name for which the migrations will be executed
 	migrationsPath: './migrations', // Migrations directory relative to the location of the config file
@@ -22,30 +21,25 @@ const mongogratorConfig = {
 	format: 'js', // Format type of the migration files ['ts', 'js']
 	callbacksBeforeMigrations: [], // Async hooks ({ db }) => Promise<void>, run once before the batch
 	callbacksAfterMigrations: [], // Async hooks ({ db }) => Promise<void>, run once after the batch
-}
-
-export default mongogratorConfig
+})
 `,
 }
 
 export const migrationTemplates = {
-	ts: `import type { Db } from 'mongodb'
+	ts: `import { buildMigration } from '@danieljanocha/mongogrator'
 
-/**
- * This function is called when the migration is run.
- * @param _db The mongodb database object that's passed to the migration
- */
-export const migrate = async (_db: Db): Promise<void> => {
-	// Migration code here
-}
+export default buildMigration({
+	migrate: async (_db) => {
+		// Migration code here
+	},
+})
 `,
-	js: `/**
- * This function is called when the migration is run.
- * @param {import("mongodb").Db} _db The mongodb database object that's passed to the migration
- * @returns {Promise<void>}
- */
-export const migrate = async (_db) => {
-	// Migration code here
-}
+	js: `import { buildMigration } from '@danieljanocha/mongogrator'
+
+export default buildMigration({
+	migrate: async (_db) => {
+		// Migration code here
+	},
+})
 `,
 }
