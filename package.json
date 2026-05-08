@@ -1,10 +1,13 @@
 {
-  "name": "mongogrator",
-  "version": "1.0.2",
+  "name": "@danieljanocha/mongogrator",
+  "version": "1.1.0",
   "description": "Mongogrator is a lightweight typescript-based package for MongoDB database migrations",
   "author": "tepinly",
   "license": "MIT",
   "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "./dist/lib.js",
   "types": "./dist/lib.d.ts",
   "exports": {
@@ -14,7 +17,7 @@
     }
   },
   "bin": {
-    "mongogrator": "./dist/index.js"
+    "mongogrator": "dist/index.js"
   },
   "files": [
     "dist",
