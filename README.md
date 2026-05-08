@@ -6,17 +6,23 @@ Mongogrator is a very fast database migration CLI for MongoDB. Its purpose is to
 
 ## Installing
 
-Using the following command, it will automatically download, install and add Mongogrator to `PATH`
-
-### MacOS/Linux
-
 ```bash
-curl -fsSL git.new/mongogrator-installer.sh | bash
+pnpm add @danieljanocha/mongogrator
+# or: npm i @danieljanocha/mongogrator
+# or: bun add @danieljanocha/mongogrator
 ```
 
-### Windows
+The CLI binary is exposed as `mongogrator` (run via `pnpm exec mongogrator`, `npx mongogrator`, or `bunx mongogrator`).
 
-```powershell
+### Standalone binary (upstream)
+
+The upstream project also ships a one-line installer that downloads a prebuilt binary:
+
+```bash
+# MacOS/Linux
+curl -fsSL git.new/mongogrator-installer.sh | bash
+
+# Windows
 cmd /c "curl -L https://git.new/mongogrator-installer.ps1 | powershell -c -"
 ```
 
@@ -27,14 +33,15 @@ Mongogrator CLI
 Usage: mongogrator <command> [options]
 
 Commands:
-   init [--js]               Initialize a new configuration file
-   add                       Creates a new migration file with the provided name
-   list                      List all migrations and their status
-   migrate [config_path]     Run all migrations that have not been applied yet
-   version, -v, --version    Prints the current version of Mongogrator
+   init [--js]                Initialize a new configuration file
+   add [--config <path>]      Creates a new migration file with the provided name
+   list [--config <path>]     List all migrations and their status
+   migrate [--config <path>]  Run all migrations that have not been applied yet
+   version, -v, --version     Prints the current version of Mongogrator
 
 Flags:
-   --help, -h                Prints the detailed description of the command
+   --help, -h                 Prints the detailed description of the command
+   --config <path>            Use a custom mongogrator config file
 ```
 
 ## Usage guide
@@ -120,11 +127,13 @@ mongogrator migrate
 
 This will run all the migrations and log them to the database under the specified collection name in the config `logsCollectionName`
 
-For production purposes, you can pass the config path to the `migrate` command directly if it's not accessible under the same path
+For production purposes, you can pass the config file path to the `migrate` command directly via `--config` if the config isn't in the current working directory
 
 ```sh
-mongogrator migrate /dist
+mongogrator migrate --config ./dist/mongogrator.config.js
 ```
+
+When `--config` is used, `migrationsPath` is resolved relative to the config file's directory.
 
 Now if you run the `list` command again, it will reveal that the migration file has been successfully executed
 
@@ -152,10 +161,24 @@ Now if you run the `list` command again, it will reveal that the migration file 
 {
   url: 'mongodb://localhost:27017', // Cluster url
   database: 'test', // Database name for which the migrations will be executed
-  migrationsPath: './migrations', // Migrations directory relative to the location of the commands
+  migrationsPath: './migrations', // Migrations directory relative to the location of the config file
   logsCollectionName: 'migrations', // Name of the logs collection that will be stored in the database
   format: 'ts', // Format type of the migration files ['ts', 'js']
+  callbacksBeforeMigrations: [], // Async hooks (args: { db }) => Promise<void>, run once before the batch
+  callbacksAfterMigrations: [], // Async hooks (args: { db }) => Promise<void>, run once after the batch
 }
+```
+
+For a type-safe config, parse against the exported schema:
+
+```ts
+import { mongogratorConfigSchema, type TMongogratorConfig } from '@danieljanocha/mongogrator'
+
+const config: TMongogratorConfig = mongogratorConfigSchema.parse({
+  // ...
+})
+
+export default config
 ```
 
 > [!IMPORTANT]
