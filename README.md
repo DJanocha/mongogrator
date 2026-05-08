@@ -2,6 +2,8 @@
   <img src="https://github.com/user-attachments/assets/103be6a4-d02c-473a-b95b-39fd6a84d8a8" alt="Mongogrator" />
 </p>
 
+> Forked from [tepinly/mongogrator](https://github.com/tepinly/mongogrator) — original work by [@tepinly](https://github.com/tepinly).
+
 Mongogrator is a very fast database migration CLI for MongoDB. Its purpose is to easily create and run migrations for development and production stages
 
 ## Installing
