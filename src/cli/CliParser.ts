@@ -1,4 +1,4 @@
-import type { CommandOptions } from '../commands/BaseCommandStrategy'
+import type { CommandOptions } from '../commands/BaseCommandStrategy.js'
 
 export class CliParser {
 	private command
@@ -7,15 +7,38 @@ export class CliParser {
 
 	constructor(argv: typeof process.argv) {
 		this.command = argv[2] ?? ''
-		this.args = argv.slice(3).filter((arg) => !arg.startsWith('-'))
-		this.flags = Object.fromEntries(
-			argv
-				.filter((arg) => arg.startsWith('-'))
-				.map((flag) => {
-					const [key, value = true] = flag.split('=')
-					return [key.startsWith('--') ? key.slice(2) : key.slice(1), value]
-				}),
-		)
+		const rest = argv.slice(3)
+		const args: string[] = []
+		const flags: CommandOptions['flags'] = {}
+
+		for (let i = 0; i < rest.length; i++) {
+			const token = rest[i]
+			if (!token.startsWith('-')) {
+				args.push(token)
+				continue
+			}
+
+			const stripped = token.startsWith('--') ? token.slice(2) : token.slice(1)
+			const eqIndex = stripped.indexOf('=')
+
+			if (eqIndex !== -1) {
+				const key = stripped.slice(0, eqIndex)
+				const value = stripped.slice(eqIndex + 1)
+				flags[key] = value
+				continue
+			}
+
+			const next = rest[i + 1]
+			if (next !== undefined && !next.startsWith('-')) {
+				flags[stripped] = next
+				i++
+			} else {
+				flags[stripped] = true
+			}
+		}
+
+		this.args = args
+		this.flags = flags
 	}
 
 	public get commandName(): string {

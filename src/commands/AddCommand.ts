@@ -1,30 +1,43 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import { ConfigurationHandler } from '../config/ConfigurationHandler'
-import { migrationTemplates } from '../config/templates'
-import { MongogratorError } from '../errors/MongogratorError'
-import { MongogratorLogger } from '../loggers/MongogratorLogger'
-import { BaseCommandStrategy } from './BaseCommandStrategy'
+import { ConfigurationHandler } from '../config/ConfigurationHandler.js'
+import { migrationTemplates } from '../config/templates.js'
+import { MongogratorError } from '../errors/MongogratorError.js'
+import { MongogratorLogger } from '../loggers/MongogratorLogger.js'
+import { BaseCommandStrategy } from './BaseCommandStrategy.js'
 
 export class AddCommand extends BaseCommandStrategy {
 	static triggers = ['add']
 	static description = 'Creates a new migration file with the provided name'
+	static flags: string[] = ['[--config <path>]']
 	static detailedDescription = `
 		This command creates a new migration file in the configured migrationsPath directory.
-		It takes one argument, the name of the migration file to be created. It appends a timestamp 
+		It takes one argument, the name of the migration file to be created. It appends a timestamp
 		to the name to ensure uniqueness. The migration file can be generated in either JavaScript (.js)
 		or TypeScript (.ts) format, based on the specified configuration in the mongogrator.config file.
+		Pass --config <path> to use a specific config file; the migration is then created relative to
+		the config file's directory.
 	`
 
 	async execute() {
 		const fileName =
 			this.commandOptions.args[0] ?? this.throwWhenNoFileNameProvided()
-		const config = await ConfigurationHandler.readConfig()
-		this.createMigrationDirectoryIfNotExists(config.migrationsPath)
+
+		const configPath =
+			typeof this.commandOptions.flags.config === 'string'
+				? this.commandOptions.flags.config
+				: undefined
+
+		const { config, configFilePath } = await ConfigurationHandler.readConfig({
+			configPath,
+		})
+
+		const baseDir = configPath ? path.dirname(configFilePath) : process.cwd()
+		const migrationsDir = path.resolve(baseDir, config.migrationsPath)
+		this.createMigrationDirectoryIfNotExists(migrationsDir)
 
 		const newFilePath = path.join(
-			process.cwd(),
-			config.migrationsPath,
+			migrationsDir,
 			`${this.getTimestamp()}_${fileName}.${config.format}`,
 		)
 

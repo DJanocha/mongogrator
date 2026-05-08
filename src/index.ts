@@ -1,5 +1,6 @@
-import { CommandExecutor } from './commands/CommandExecutor'
-import { MongogratorLogger } from './loggers/MongogratorLogger'
+#!/usr/bin/env node
+import { CommandExecutor } from './commands/CommandExecutor.js'
+import { MongogratorLogger } from './loggers/MongogratorLogger.js'
 ;(async () => {
 	const start = Date.now()
 	await new CommandExecutor(process.argv).executeCommand().catch((err) => {

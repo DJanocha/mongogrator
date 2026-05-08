@@ -1,6 +1,6 @@
-import { ConfigurationHandler } from '../config/ConfigurationHandler'
-import { CONFIG_JS_FILE_NAME, CONFIG_TS_FILE_NAME } from '../config/config'
-import { BaseCommandStrategy } from './BaseCommandStrategy'
+import { ConfigurationHandler } from '../config/ConfigurationHandler.js'
+import { CONFIG_JS_FILE_NAME, CONFIG_TS_FILE_NAME } from '../config/config.js'
+import { BaseCommandStrategy } from './BaseCommandStrategy.js'
 
 export class InitCommand extends BaseCommandStrategy {
 	static triggers = ['init']

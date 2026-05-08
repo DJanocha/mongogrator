@@ -1,7 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import type { Collection } from 'mongodb'
-import { MongogratorError } from '../errors/MongogratorError'
+import { MongogratorError } from '../errors/MongogratorError.js'
 
 export type TMigration = {
 	name: string

@@ -1,26 +1,52 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import { MongogratorError } from '../errors/MongogratorError'
-import { MongogratorLogger } from '../loggers/MongogratorLogger'
+import { pathToFileURL } from 'node:url'
+import { MongogratorError } from '../errors/MongogratorError.js'
+import { MongogratorLogger } from '../loggers/MongogratorLogger.js'
 import {
 	CONFIG_FILE_NAME,
 	CONFIG_JS_FILE_NAME,
 	CONFIG_TS_FILE_NAME,
 	type TMongogratorConfig,
 	mongogratorConfigSchema,
-} from './config'
-import { configTemplates } from './templates'
+} from './config.js'
+import { configTemplates } from './templates.js'
+
+export type ReadConfigOptions = {
+	configPath?: string
+}
+
+export type LoadedConfig = {
+	config: TMongogratorConfig
+	configFilePath: string
+}
 
 export namespace ConfigurationHandler {
 	export async function readConfig(
-		customPath = '',
-	): Promise<TMongogratorConfig> {
-		for (const configFileName of [CONFIG_TS_FILE_NAME, CONFIG_JS_FILE_NAME]) {
-			const relativePath = path.join(process.cwd(), customPath, configFileName)
-			if (fs.existsSync(relativePath)) {
-				return await import(relativePath).then((module) =>
-					mongogratorConfigSchema.parseAsync(module.default),
+		options: ReadConfigOptions = {},
+	): Promise<LoadedConfig> {
+		const { configPath } = options
+
+		if (configPath) {
+			const absPath = path.resolve(process.cwd(), configPath)
+			if (!fs.existsSync(absPath)) {
+				throw new MongogratorError(
+					`Config file not found at "${absPath}"`,
 				)
+			}
+			const module = await import(pathToFileURL(absPath).href)
+			const config = await mongogratorConfigSchema.parseAsync(module.default)
+			return { config, configFilePath: absPath }
+		}
+
+		for (const configFileName of [CONFIG_TS_FILE_NAME, CONFIG_JS_FILE_NAME]) {
+			const absPath = path.join(process.cwd(), configFileName)
+			if (fs.existsSync(absPath)) {
+				const module = await import(pathToFileURL(absPath).href)
+				const config = await mongogratorConfigSchema.parseAsync(
+					module.default,
+				)
+				return { config, configFilePath: absPath }
 			}
 		}
 

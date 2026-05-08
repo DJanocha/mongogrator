@@ -1,4 +1,4 @@
-import { MongogratorError } from '../errors/MongogratorError'
+import { MongogratorError } from '../errors/MongogratorError.js'
 
 export namespace MongogratorLogger {
 	const prefixLog = (level: string) =>

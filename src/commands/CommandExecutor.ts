@@ -1,9 +1,9 @@
-import { CliParser } from '../cli/CliParser'
-import { AddCommand } from './AddCommand'
-import { InitCommand } from './InitCommand'
-import { ListCommand } from './ListCommand'
-import { MigrateCommand } from './MigrateCommand'
-import { VersionCommand } from './VersionCommand'
+import { CliParser } from '../cli/CliParser.js'
+import { AddCommand } from './AddCommand.js'
+import { InitCommand } from './InitCommand.js'
+import { ListCommand } from './ListCommand.js'
+import { MigrateCommand } from './MigrateCommand.js'
+import { VersionCommand } from './VersionCommand.js'
 
 type TCommand = CommandExecutor['commandsList'][number]
 export class CommandExecutor {
@@ -65,6 +65,11 @@ export class CommandExecutor {
 				''.padStart(PADDING_START),
 				'--help, -h'.padEnd(PADDING_END),
 				'Prints the detailed description of the command',
+			)
+			console.log(
+				''.padStart(PADDING_START),
+				'--config <path>'.padEnd(PADDING_END),
+				'Use a custom mongogrator config file (e.g. ./infra/mongogrator.config.ts)',
 			)
 			process.exit(0)
 		}
