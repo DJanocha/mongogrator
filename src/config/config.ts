@@ -17,7 +17,7 @@ const callbackSchema = z.custom<MongogratorMigrationCallback>(
 )
 
 export const mongogratorConfigSchema = z.object({
-	url: z.string().url(),
+	url: z.url(),
 	database: z.string(),
 	migrationsPath: z.string(),
 	logsCollectionName: z.string(),
@@ -28,12 +28,12 @@ export const mongogratorConfigSchema = z.object({
 
 export type MongogratorConfig = z.input<typeof mongogratorConfigSchema>
 
-export const buildMongogratorConfig = (input: z.input<typeof mongogratorConfigSchema>) =>
-	mongogratorConfigSchema.parse(input)
+export const buildMongogratorConfig = (
+	input: z.input<typeof mongogratorConfigSchema>,
+) => mongogratorConfigSchema.parse(input)
 
 export type MongogratorMigration = {
 	migrate: (db: Db) => Promise<void>
 }
 
 export const buildMigration = (input: MongogratorMigration) => input
-

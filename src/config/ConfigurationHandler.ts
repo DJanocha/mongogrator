@@ -1,14 +1,14 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
+import type z from 'zod'
 import { MongogratorError } from '../errors/MongogratorError.js'
 import { MongogratorLogger } from '../loggers/MongogratorLogger.js'
-import type z from 'zod'
 import {
 	CONFIG_FILE_NAME,
 	CONFIG_JS_FILE_NAME,
 	CONFIG_TS_FILE_NAME,
-	ConfigFormatSchema,
+	type ConfigFormatSchema,
 	mongogratorConfigSchema,
 } from './config.js'
 import { configTemplates } from './templates.js'
@@ -31,9 +31,7 @@ export namespace ConfigurationHandler {
 		if (configPath) {
 			const absPath = path.resolve(process.cwd(), configPath)
 			if (!fs.existsSync(absPath)) {
-				throw new MongogratorError(
-					`Config file not found at "${absPath}"`,
-				)
+				throw new MongogratorError(`Config file not found at "${absPath}"`)
 			}
 			const module = await import(pathToFileURL(absPath).href)
 			const config = await mongogratorConfigSchema.parseAsync(module.default)
@@ -44,9 +42,7 @@ export namespace ConfigurationHandler {
 			const absPath = path.join(process.cwd(), configFileName)
 			if (fs.existsSync(absPath)) {
 				const module = await import(pathToFileURL(absPath).href)
-				const config = await mongogratorConfigSchema.parseAsync(
-					module.default,
-				)
+				const config = await mongogratorConfigSchema.parseAsync(module.default)
 				return { config, configFilePath: absPath }
 			}
 		}
@@ -56,7 +52,7 @@ export namespace ConfigurationHandler {
 
 	export async function initConfig(useJs: boolean) {
 		const fileName = useJs ? CONFIG_JS_FILE_NAME : CONFIG_TS_FILE_NAME
-		const extension : z.infer<typeof ConfigFormatSchema> = useJs ? 'js' : 'ts'
+		const extension: z.infer<typeof ConfigFormatSchema> = useJs ? 'js' : 'ts'
 		const configFilePath = path.join(process.cwd(), fileName)
 		if (fs.existsSync(configFilePath)) {
 			throw new MongogratorError(`${fileName} already initialized`)
