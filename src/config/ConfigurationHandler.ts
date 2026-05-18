@@ -26,7 +26,7 @@ export namespace ConfigurationHandler {
 	export async function readConfig(
 		options: ReadConfigOptions = {},
 	): Promise<LoadedConfig> {
-		const { configPath } = options
+		const configPath = options.configPath ?? process.env.MONGOGRATOR_CONFIG_PATH
 
 		if (configPath) {
 			const absPath = path.resolve(process.cwd(), configPath)

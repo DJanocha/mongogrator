@@ -16,7 +16,8 @@ export class MigrateCommand extends BaseCommandStrategy {
 		This command executes all pending migration files in the migrations directory.
 		Migrations that have already been applied are skipped.
 		By default the config file is loaded from the current working directory; pass
-		--config <path> to point at a specific mongogrator.config.{ts,js} file.
+		--config <path> or set MONGOGRATOR_CONFIG_PATH to point at a specific
+		mongogrator.config.{ts,js} file. The --config flag wins over the env var.
 		The config file determines the location of the migrations folder.
 		Each migration file must default-export a value created with buildMigration({ migrate }).
 	`
@@ -31,8 +32,10 @@ export class MigrateCommand extends BaseCommandStrategy {
 			configPath,
 		})
 
-		const baseDir = configPath ? path.dirname(configFilePath) : process.cwd()
-		const migrationsDir = path.resolve(baseDir, config.migrationsPath)
+		const migrationsDir = path.resolve(
+			path.dirname(configFilePath),
+			config.migrationsPath,
+		)
 		const migrationFiles = MigrationsService.getMigrations([migrationsDir])
 		const clientInstance = new Client(config)
 

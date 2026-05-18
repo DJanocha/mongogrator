@@ -13,7 +13,8 @@ export class ListCommand extends BaseCommandStrategy {
 		It checks each migration file to determine whether it has been applied to the database.
 		Each migration will be displayed with a status of either "MIGRATED" if it has been applied,
 		or "NOT MIGRATED" if it has not been applied yet.
-		Pass --config <path> to use a specific config file.
+		Pass --config <path> or set MONGOGRATOR_CONFIG_PATH to use a specific config file
+		(--config wins over the env var).
 	`
 
 	async execute() {
@@ -26,8 +27,10 @@ export class ListCommand extends BaseCommandStrategy {
 			configPath,
 		})
 
-		const baseDir = configPath ? path.dirname(configFilePath) : process.cwd()
-		const migrationsDir = path.resolve(baseDir, config.migrationsPath)
+		const migrationsDir = path.resolve(
+			path.dirname(configFilePath),
+			config.migrationsPath,
+		)
 		const files = MigrationsService.getMigrations([migrationsDir])
 		const clientInstance = new Client(config)
 

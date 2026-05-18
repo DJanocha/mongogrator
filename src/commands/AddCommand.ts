@@ -15,8 +15,9 @@ export class AddCommand extends BaseCommandStrategy {
 		It takes one argument, the name of the migration file to be created. It appends a timestamp
 		to the name to ensure uniqueness. The migration file can be generated in either JavaScript (.js)
 		or TypeScript (.ts) format, based on the specified configuration in the mongogrator.config file.
-		Pass --config <path> to use a specific config file; the migration is then created relative to
-		the config file's directory.
+		Pass --config <path> or set MONGOGRATOR_CONFIG_PATH to use a specific config file
+		(--config wins over the env var); the migration is then created relative to the config
+		file's directory.
 	`
 
 	async execute() {
@@ -32,8 +33,10 @@ export class AddCommand extends BaseCommandStrategy {
 			configPath,
 		})
 
-		const baseDir = configPath ? path.dirname(configFilePath) : process.cwd()
-		const migrationsDir = path.resolve(baseDir, config.migrationsPath)
+		const migrationsDir = path.resolve(
+			path.dirname(configFilePath),
+			config.migrationsPath,
+		)
 		this.createMigrationDirectoryIfNotExists(migrationsDir)
 
 		const newFilePath = path.join(

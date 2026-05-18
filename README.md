@@ -44,6 +44,9 @@ Commands:
 Flags:
    --help, -h                 Prints the detailed description of the command
    --config <path>            Use a custom mongogrator config file
+
+Environment variables:
+   MONGOGRATOR_CONFIG_PATH    Equivalent of --config (--config wins if both are set)
 ```
 
 ## Usage guide
@@ -130,7 +133,24 @@ For production purposes, you can pass the config file path to the `migrate` comm
 mongogrator migrate --config ./dist/mongogrator.config.js
 ```
 
-When `--config` is used, `migrationsPath` is resolved relative to the config file's directory.
+Alternatively, set the `MONGOGRATOR_CONFIG_PATH` environment variable. This is handy when wiring a single `pnpm migrate` script that forwards arbitrary subcommands:
+
+```jsonc
+// package.json
+{
+  "scripts": {
+    "migrate": "MONGOGRATOR_CONFIG_PATH=./src/migrations/mongogrator.config.ts mongogrator"
+  }
+}
+```
+
+```sh
+pnpm migrate apply   # → mongogrator apply  (reads MONGOGRATOR_CONFIG_PATH)
+pnpm migrate list    # → mongogrator list
+pnpm migrate add foo # → mongogrator add foo
+```
+
+If both are provided, `--config` wins over the env var. In either case, `migrationsPath` is resolved relative to the config file's directory.
 
 Now if you run the `list` command again, it will reveal that the migration file has been successfully executed
 

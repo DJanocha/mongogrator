@@ -71,6 +71,11 @@ export class CommandExecutor {
 				'--config <path>'.padEnd(PADDING_END),
 				'Use a custom mongogrator config file (e.g. ./infra/mongogrator.config.ts)',
 			)
+			console.log(
+				''.padStart(PADDING_START),
+				'MONGOGRATOR_CONFIG_PATH'.padEnd(PADDING_END),
+				'Env var equivalent of --config (--config wins if both are set)',
+			)
 			process.exit(0)
 		}
 	}
