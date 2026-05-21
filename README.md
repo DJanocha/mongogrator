@@ -38,7 +38,8 @@ Commands:
    init [--js]                Initialize a new configuration file
    add [--config <path>]      Creates a new migration file with the provided name
    list [--config <path>]     List all migrations and their status
-   migrate [--config <path>]  Run all migrations that have not been applied yet
+   apply, migrate             Run all migrations that have not been applied yet
+                              (alias: migrate; accepts [--config <path>])
    version, -v, --version     Prints the current version of Mongogrator
 
 Flags:
@@ -122,15 +123,15 @@ Naturally, the status will be `NOT MIGRATED` as we haven't run the migration yet
 Run the migrations simply by calling
 
 ```sh
-mongogrator migrate
+mongogrator apply
 ```
 
 This will run all the migrations and log them to the database under the specified collection name in the config `logsCollectionName`
 
-For production purposes, you can pass the config file path to the `migrate` command directly via `--config` if the config isn't in the current working directory
+For production purposes, you can pass the config file path to the `apply` command directly via `--config` if the config isn't in the current working directory
 
 ```sh
-mongogrator migrate --config ./dist/mongogrator.config.js
+mongogrator apply --config ./dist/mongogrator.config.js
 ```
 
 Alternatively, set the `MONGOGRATOR_CONFIG_PATH` environment variable. This is handy when wiring a single `pnpm migrate` script that forwards arbitrary subcommands:

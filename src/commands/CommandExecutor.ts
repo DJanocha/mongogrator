@@ -1,8 +1,8 @@
 import { CliParser } from '../cli/CliParser.js'
 import { AddCommand } from './AddCommand.js'
+import { ApplyCommand } from './ApplyCommand.js'
 import { InitCommand } from './InitCommand.js'
 import { ListCommand } from './ListCommand.js'
-import { MigrateCommand } from './MigrateCommand.js'
 import { VersionCommand } from './VersionCommand.js'
 
 type TCommand = CommandExecutor['commandsList'][number]
@@ -14,7 +14,7 @@ export class CommandExecutor {
 		InitCommand,
 		AddCommand,
 		ListCommand,
-		MigrateCommand,
+		ApplyCommand,
 		VersionCommand,
 	] as const
 

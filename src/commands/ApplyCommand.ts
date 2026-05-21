@@ -8,8 +8,8 @@ import { MongogratorError } from '../errors/MongogratorError.js'
 import { MongogratorLogger } from '../loggers/MongogratorLogger.js'
 import { BaseCommandStrategy } from './BaseCommandStrategy.js'
 
-export class MigrateCommand extends BaseCommandStrategy {
-	static triggers = ['migrate']
+export class ApplyCommand extends BaseCommandStrategy {
+	static triggers = ['apply', 'migrate']
 	static description = 'Run all migrations that have not been applied yet'
 	static flags: string[] = ['[--config <path>]']
 	static detailedDescription = `
