@@ -1,4 +1,5 @@
 import { CliParser } from '../cli/CliParser.js'
+import { version } from '../pkg.js'
 import { AddCommand } from './AddCommand.js'
 import { ApplyCommand } from './ApplyCommand.js'
 import { InitCommand } from './InitCommand.js'
@@ -46,7 +47,7 @@ export class CommandExecutor {
 		}
 		// if the commandName is not found, print the general help message
 		if (!chosenCommand) {
-			console.log('Mongogrator CLI')
+			console.log(`Mongogrator CLI v${version}`)
 			console.log('Usage: mongogrator <command> [options]')
 			console.log('\nCommands:')
 			const PADDING_END = 25
