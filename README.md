@@ -48,7 +48,12 @@ Flags:
 
 Environment variables:
    MONGOGRATOR_CONFIG_PATH    Equivalent of --config (--config wins if both are set)
+   NO_COLOR                   Set to any value to disable colored log output
 ```
+
+Log output is colorized by default (blue for info, red for errors) so
+Mongogrator lines stand out in CI build logs. Set `NO_COLOR` to any value to
+force plain, uncolored output (see [no-color.org](https://no-color.org)).
 
 ## Usage guide
 
