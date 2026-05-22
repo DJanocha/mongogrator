@@ -1,11 +1,11 @@
 import path from 'node:path'
-import { pathToFileURL } from 'node:url'
 import { ConfigurationHandler } from '../config/ConfigurationHandler.js'
 import type { MongogratorMigration } from '../config/config.js'
 import { MigrationsService } from '../db/MigrationsService.js'
 import { Client } from '../db/MongoDb.js'
 import { MongogratorError } from '../errors/MongogratorError.js'
 import { MongogratorLogger } from '../loggers/MongogratorLogger.js'
+import { loadModule } from '../moduleLoader.js'
 import { BaseCommandStrategy } from './BaseCommandStrategy.js'
 
 export class ApplyCommand extends BaseCommandStrategy {
@@ -69,8 +69,8 @@ async function loadMigration(
 	absPath: string,
 	displayName: string,
 ): Promise<MongogratorMigration> {
-	const mod = await import(pathToFileURL(absPath).href)
-	const migration = mod.default as MongogratorMigration | undefined
+	const mod = (await loadModule(absPath)) as { default?: MongogratorMigration }
+	const migration = mod.default
 	if (!migration || typeof migration.migrate !== 'function') {
 		throw new MongogratorError(
 			`Migration "${displayName}" must default-export a value created with buildMigration({ migrate })`,

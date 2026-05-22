@@ -1,9 +1,9 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import { pathToFileURL } from 'node:url'
 import type z from 'zod'
 import { MongogratorError } from '../errors/MongogratorError.js'
 import { MongogratorLogger } from '../loggers/MongogratorLogger.js'
+import { loadModule } from '../moduleLoader.js'
 import {
 	CONFIG_FILE_NAME,
 	CONFIG_JS_FILE_NAME,
@@ -33,7 +33,7 @@ export namespace ConfigurationHandler {
 			if (!fs.existsSync(absPath)) {
 				throw new MongogratorError(`Config file not found at "${absPath}"`)
 			}
-			const module = await import(pathToFileURL(absPath).href)
+			const module = (await loadModule(absPath)) as { default: unknown }
 			const config = await mongogratorConfigSchema.parseAsync(module.default)
 			return { config, configFilePath: absPath }
 		}
@@ -41,7 +41,7 @@ export namespace ConfigurationHandler {
 		for (const configFileName of [CONFIG_TS_FILE_NAME, CONFIG_JS_FILE_NAME]) {
 			const absPath = path.join(process.cwd(), configFileName)
 			if (fs.existsSync(absPath)) {
-				const module = await import(pathToFileURL(absPath).href)
+				const module = (await loadModule(absPath)) as { default: unknown }
 				const config = await mongogratorConfigSchema.parseAsync(module.default)
 				return { config, configFilePath: absPath }
 			}
