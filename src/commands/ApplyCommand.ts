@@ -39,9 +39,9 @@ export class ApplyCommand extends BaseCommandStrategy {
 		const migrationFiles = MigrationsService.getMigrations([migrationsDir])
 		const clientInstance = new Client(config)
 
-		await clientInstance.run(async ({ collection, db }) => {
+		await clientInstance.run(async ({ collection, db, client }) => {
 			for (const cb of config.callbacksBeforeMigrations) {
-				await cb({ db })
+				await cb({ db, client })
 			}
 
 			const migrationsService = new MigrationsService(collection)
@@ -52,14 +52,14 @@ export class ApplyCommand extends BaseCommandStrategy {
 						path.join(migrationsDir, file),
 						file,
 					)
-					await migration.migrate(db)
+					await migration.migrate({ db, client })
 					await migrationsService.insertApplied(path.parse(file).name)
 					MongogratorLogger.logInfo(`Migration ${file} applied`)
 				}
 			}
 
 			for (const cb of config.callbacksAfterMigrations) {
-				await cb({ db })
+				await cb({ db, client })
 			}
 		})
 	}

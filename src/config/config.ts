@@ -1,4 +1,4 @@
-import type { Db } from 'mongodb'
+import type { Db, MongoClient } from 'mongodb'
 import { z } from 'zod'
 
 export const CONFIG_FILE_NAME = 'mongogrator.config'
@@ -7,9 +7,14 @@ export const CONFIG_JS_FILE_NAME = `${CONFIG_FILE_NAME}.js`
 
 export const ConfigFormatSchema = z.enum(['js', 'ts'])
 
-export type MongogratorMigrationCallback = (args: {
+export type MongogratorMigrationArgs = {
 	db: Db
-}) => Promise<void>
+	client: MongoClient
+}
+
+export type MongogratorMigrationCallback = (
+	args: MongogratorMigrationArgs,
+) => Promise<void>
 
 const callbackSchema = z.custom<MongogratorMigrationCallback>(
 	(val) => typeof val === 'function',
@@ -33,7 +38,7 @@ export const buildMongogratorConfig = (
 ) => mongogratorConfigSchema.parse(input)
 
 export type MongogratorMigration = {
-	migrate: (db: Db) => Promise<void>
+	migrate: (args: MongogratorMigrationArgs) => Promise<void>
 }
 
 export const buildMigration = (input: MongogratorMigration) => input

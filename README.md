@@ -83,13 +83,13 @@ The following is an example of a newly created ts migration file
 import { buildMigration } from '@danieljanocha/mongogrator'
 
 export default buildMigration({
-  migrate: async (_db) => {
+  migrate: async ({ db, client }) => {
     // Migration code here
   },
 })
 ```
 
-The migrations are executed through the native MongoDB Node.js driver.
+The migrations are executed through the native MongoDB Node.js driver. Each migration receives both the default `db` (resolved from `config.database`) and the underlying `client` (`MongoClient`) so you can reach additional databases when needed.
 
 ### Migration query example
 
@@ -97,8 +97,29 @@ The migrations are executed through the native MongoDB Node.js driver.
 import { buildMigration } from '@danieljanocha/mongogrator'
 
 export default buildMigration({
-  migrate: async (db) => {
+  migrate: async ({ db }) => {
     await db.collection('users').insertOne({ name: 'Alex' })
+  },
+})
+```
+
+### Multi-database migrations
+
+If you run several databases off the same cluster (e.g. one for auth + one per app client), use `client` to address them explicitly:
+
+```ts
+import { buildMigration } from '@danieljanocha/mongogrator'
+
+export default buildMigration({
+  migrate: async ({ client }) => {
+    const authDb = client.db('auth')
+    const twitchDb = client.db('twitch')
+    const facebookDb = client.db('facebook')
+
+    await authDb.collection('users').createIndex({ email: 1 }, { unique: true })
+    for (const appDb of [twitchDb, facebookDb]) {
+      await appDb.collection('sessions').createIndex({ createdAt: 1 })
+    }
   },
 })
 ```
@@ -187,8 +208,8 @@ Now if you run the `list` command again, it will reveal that the migration file 
   migrationsPath: './migrations', // Migrations directory relative to the location of the config file
   logsCollectionName: 'migrations', // Name of the logs collection that will be stored in the database
   format: 'ts', // Format type of the migration files ['ts', 'js']
-  callbacksBeforeMigrations: [], // Async hooks (args: { db }) => Promise<void>, run once before the batch
-  callbacksAfterMigrations: [], // Async hooks (args: { db }) => Promise<void>, run once after the batch
+  callbacksBeforeMigrations: [], // Async hooks ({ db, client }) => Promise<void>, run once before the batch
+  callbacksAfterMigrations: [], // Async hooks ({ db, client }) => Promise<void>, run once after the batch
 }
 ```
 
@@ -214,7 +235,7 @@ Migration files use the same builder pattern with a forced `default` export — 
 import { buildMigration } from '@danieljanocha/mongogrator'
 
 export default buildMigration({
-  migrate: async (db) => {
+  migrate: async ({ db }) => {
     await db.collection('users').insertOne({ name: 'Alex' })
   },
 })

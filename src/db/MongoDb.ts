@@ -14,7 +14,11 @@ export class Client {
 
 	public run = async (
 		fn: (
-			clientArgs: { db: Db; collection: Collection<TMigration> },
+			clientArgs: {
+				db: Db
+				client: MongoClient
+				collection: Collection<TMigration>
+			},
 			...args: any[]
 		) => Promise<any>,
 		...args: any[]
@@ -22,7 +26,7 @@ export class Client {
 		try {
 			await this.client.connect()
 			const result = await fn(
-				{ db: this.db, collection: this.collection },
+				{ db: this.db, client: this.client, collection: this.collection },
 				...args,
 			)
 			return result
