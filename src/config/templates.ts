@@ -9,6 +9,7 @@ export default buildMongogratorConfig({
 	format: 'ts', // Format type of the migration files ['ts', 'js']
 	callbacksBeforeMigrations: [], // Async hooks ({ db, client }) => Promise<void>, run once before the batch
 	callbacksAfterMigrations: [], // Async hooks ({ db, client }) => Promise<void>, run once after the batch
+	// generateId: () => crypto.randomUUID(), // Optional. Sets the _id of every row inserted into the logs collection. Default: MongoDB auto-generated ObjectId.
 })
 `,
 	js: `import { buildMongogratorConfig } from '@danieljanocha/mongogrator'
@@ -21,6 +22,7 @@ export default buildMongogratorConfig({
 	format: 'js', // Format type of the migration files ['ts', 'js']
 	callbacksBeforeMigrations: [], // Async hooks ({ db, client }) => Promise<void>, run once before the batch
 	callbacksAfterMigrations: [], // Async hooks ({ db, client }) => Promise<void>, run once after the batch
+	// generateId: () => crypto.randomUUID(), // Optional. Sets the _id of every row inserted into the logs collection. Default: MongoDB auto-generated ObjectId.
 })
 `,
 }

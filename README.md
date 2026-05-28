@@ -199,6 +199,8 @@ Now if you run the `list` command again, it will reveal that the migration file 
 }
 ```
 
+By default `_id` is an auto-generated MongoDB `ObjectId`. If you'd rather use a different id type (e.g. a plain string UUID), pass a `generateId` function in the config — see [Custom `_id` in the logs collection](#custom-_id-in-the-logs-collection) below.
+
 ## Configuration
 
 ```ts
@@ -210,8 +212,34 @@ Now if you run the `list` command again, it will reveal that the migration file 
   format: 'ts', // Format type of the migration files ['ts', 'js']
   callbacksBeforeMigrations: [], // Async hooks ({ db, client }) => Promise<void>, run once before the batch
   callbacksAfterMigrations: [], // Async hooks ({ db, client }) => Promise<void>, run once after the batch
+  generateId: () => crypto.randomUUID(), // Optional. Sets the _id of every row inserted into the logs collection. Omit to let MongoDB auto-generate an ObjectId.
 }
 ```
+
+### Custom `_id` in the logs collection
+
+By default Mongogrator does not set `_id` on the rows it writes to the logs collection (`logsCollectionName`), so the MongoDB driver auto-generates a fresh `ObjectId` per insert. If you'd rather store a different id type — for example a plain string UUID so the field is easier to read or copy from a GUI — pass a `generateId` function in the config:
+
+```ts
+import { buildMongogratorConfig } from '@danieljanocha/mongogrator'
+import { randomUUID } from 'node:crypto'
+
+export default buildMongogratorConfig({
+  url: 'mongodb://localhost:27017',
+  database: 'test',
+  migrationsPath: './migrations',
+  logsCollectionName: 'migrations',
+  format: 'ts',
+  generateId: () => randomUUID(),
+})
+```
+
+Notes:
+
+- `generateId` is called once per applied migration, and its return value is written as that row's `_id`.
+- It affects **only** the logs collection. Documents your own migrations insert are not touched.
+- Return whatever BSON-compatible type you want — a string (e.g. `randomUUID()`), an `ObjectId`, a number, etc.
+- Omit the field to keep the default behavior (auto-generated `ObjectId`).
 
 For a type-safe config, use the `buildMongogratorConfig` builder. It validates the shape at load time and gives you autocomplete on the input:
 

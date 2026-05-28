@@ -21,6 +21,13 @@ const callbackSchema = z.custom<MongogratorMigrationCallback>(
 	{ message: 'Callback must be a function' },
 )
 
+export type MongogratorGenerateId = () => unknown
+
+const generateIdSchema = z.custom<MongogratorGenerateId>(
+	(val) => typeof val === 'function',
+	{ message: 'generateId must be a function' },
+)
+
 export const mongogratorConfigSchema = z.object({
 	url: z.url(),
 	database: z.string(),
@@ -29,6 +36,7 @@ export const mongogratorConfigSchema = z.object({
 	format: ConfigFormatSchema,
 	callbacksBeforeMigrations: callbackSchema.array().optional().default([]),
 	callbacksAfterMigrations: callbackSchema.array().optional().default([]),
+	generateId: generateIdSchema.optional(),
 })
 
 export type MongogratorConfig = z.input<typeof mongogratorConfigSchema>

@@ -44,7 +44,10 @@ export class ApplyCommand extends BaseCommandStrategy {
 				await cb({ db, client })
 			}
 
-			const migrationsService = new MigrationsService(collection)
+			const migrationsService = new MigrationsService(
+				collection,
+				config.generateId,
+			)
 			const appliedMigrationsSet = await migrationsService.getAppliedSet()
 			for (const file of migrationFiles) {
 				if (!appliedMigrationsSet.has(path.parse(file).name)) {

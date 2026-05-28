@@ -1,6 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import type { Collection } from 'mongodb'
+import type { Collection, OptionalUnlessRequiredId } from 'mongodb'
+import type { MongogratorGenerateId } from '../config/config.js'
 import { MongogratorError } from '../errors/MongogratorError.js'
 
 export type TMigration = {
@@ -9,7 +10,10 @@ export type TMigration = {
 }
 
 export class MigrationsService {
-	constructor(private readonly collection: Collection<TMigration>) {}
+	constructor(
+		private readonly collection: Collection<TMigration>,
+		private readonly generateId?: MongogratorGenerateId,
+	) {}
 
 	public async getAppliedSet() {
 		return new Set(
@@ -22,10 +26,15 @@ export class MigrationsService {
 	}
 
 	public async insertApplied(migrationName: string) {
-		return this.collection.insertOne({
+		const generatedId = this.generateId?.()
+		const doc = {
 			name: migrationName,
 			createdAt: new Date(),
-		})
+			_id: generatedId
+		}
+		return this.collection.insertOne(
+			doc as unknown as OptionalUnlessRequiredId<TMigration>,
+		)
 	}
 
 	public static getMigrations(pathArray: string[]) {
